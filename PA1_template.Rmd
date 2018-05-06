@@ -74,21 +74,18 @@ mean_na_steps[which.max(mean_na_steps[,2]),]
 Below strategy to replace NA with the mean number of the according interval. The whole data is 
 instored in rev_aci_data.
 
+1.Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{r table_missing_value}
+table(is.na(aci_data$steps))
+```
+2.Fill in all of the missing values in the dataset with the mean for that 5-minute interval.
+3.Create a new dataset that is equal to the original dataset but with the missing data filled in.
 ```{r imputing_missing}
-imputing_miss_value<-function(input_data=aci_data){
-  rev_aci_data<-aci_data
-  na_da<-rev_aci_data[is.na(rev_aci_data$steps),]
-  #mean value to replace the missing value
-  na_dat<-as.character(unique(na_da$date))
-  tem<-length(na_dat)
+aci_data$mean <- ifelse(is.na(aci_data$steps), mean_na_steps$mean_steps, aci_data$steps)
+head(aci_data)
+rev_aci_data <- aci_data[ ,-1]
+names(rev_aci_data) <- c("date", "interval", "steps")
 
-  for(j in 1:tem){
-    rev_aci_data[rev_aci_data$date==na_dat[j],]<-rev_aci_data[rev_aci_data$date==na_dat[j],]%>% mutate(steps=mean_na_steps[,2])
-  }
-  return(rev_aci_data)
-}
-
-rev_aci_data<-imputing_miss_value()
 ```
 
 ## Histogram of the total number of steps taken each day after missing values are imputed
@@ -102,20 +99,14 @@ hist(by_da$sum_step)
 After replace the missing value, below code compare the average number of steps taken per 5-minute intervals across weekdays and weekends.
 
 ```{r plot_weekds_vs_weekends}
-
-is_weekd<-filter(rev_aci_data,weekdays(as.Date(rev_aci_data$date,format= "%Y-%m-%d"))!="星期六"&
-                        weekdays(as.Date(rev_aci_data$date,format= "%Y-%m-%d"))!="星期日")
-not_weekd<-filter(rev_aci_data,weekdays(as.Date(rev_aci_data$date,format= "%Y-%m-%d"))=="星期六"|
-                        weekdays(as.Date(rev_aci_data$date,format= "%Y-%m-%d"))=="星期日")
-
-mean_steps<-tapply(rev_aci_data$steps,rev_aci_data$interval,mean)
-mean_weekdays<-tapply(is_weekd$steps,is_weekd$interval,mean)
-mean_weekends<-tapply(not_weekd$steps,not_weekd$interval,mean)
-mean_acro_week<-cbind(as.data.frame(unique(aci_data$interval)),as.data.frame(round(mean_steps,0)),
-                      as.data.frame(round(mean_weekdays,0)),as.data.frame(round(mean_weekends,0)))
-names(mean_acro_week)<-c("interval","mean_steps","mean_weekdays","mean_weekends")
-par(mar=c(4,4,2,2),mfrow=c(2,1))
-with(mean_acro_week,{plot(interval,mean_weekdays-mean_steps,type="l",main="week days steps",ylim = c(-80,80)) +plot(interval,mean_weekends-mean_steps,type = "l",main="weekends steps",ylim = c(-80,80))})
+rev_aci_data$weekDay <- as.factor(weekdays(as.Date(rev_aci_data$date)))
+rev_aci_data$isWeekDay<-"weekday"
+rev_aci_data$isWeekDay[rev_aci_data$weekDay=="星期六" |rev_aci_data$weekDay=="星期日"]<-"weekend"
+rev_aci_data$isWeekDay<-as.factor(rev_aci_data$isWeekDay)
+summary_by<-aggregate(steps ~ interval + isWeekDay,data=rev_aci_data,FUN=mean)
+library("lattice")
+xyplot(steps~interval|isWeekDay,summary_by,type="l",layout=c(1,2),
+          xlab="interval",ylab="number of steps")
 
 
 ```
