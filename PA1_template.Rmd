@@ -1,7 +1,7 @@
 ---
 title: "PA1_template.Rmd"
 author: "xmyyj001"
-date: "2018年5月1日"
+date: "2018??5??1??"
 output: html_document
 ---
 ## Introduction
@@ -42,14 +42,17 @@ hist(by_da$sum_step)
 
 ## calculate mean and median number of steps taken each day
 Calculate the total number of steps taken per day,then calculate and report the mean and median of the total number of steps taken per day.
-Mean number of steps  taken per day:
+
 ```{r calcu_mean}
-mean(by_da$sum_step,na.rm = T)
+mea_steps<-mean(by_da$sum_step,na.rm = T)
 ```
-Median number of steps taken per day:
+Mean number of steps  taken per day: `r mea_steps`.
+
+
 ```{r calcu_median}
-median(by_da$sum_step,na.rm = T)
+med_steps<-median(by_da$sum_step,na.rm = T)
 ```
+Median number of steps taken per day: `r med_steps`
 
 ## Time series plot of the average number of steps taken
 ```{r plot_TS_average}
@@ -63,11 +66,13 @@ with(mean_na_steps,plot(interval,mean_steps,type="l",main="average number of ste
 ```
 
 ## The 5-minute interval that, on average, contains the maximum number of steps
-5-minute interval, on average across all the days in the dataset, contains the maximum number of steps, which is:
+5-minute interval, on average across all the days in the dataset, contains the maximum number of steps:
 ```{r 5-min_max_steps}
-mean_na_steps[which.max(mean_na_steps[,2]),]
-
+max_steps<-mean_na_steps[which.max(mean_na_steps[,2]),]
+max_steps<-as.numeric(max_steps[1,2])
 ```
+The maximum number of steps is `r max_steps`
+
 
 ## Code to describe and show a strategy for imputing missing data
 
@@ -78,7 +83,7 @@ instored in rev_aci_data.
 ```{r table_missing_value}
 table(is.na(aci_data$steps))
 ```
-2.Fill in all of the missing values in the dataset with the mean for that 5-minute interval.
+2.Fill in all of the missing values in the dataset with the mean for that 5-minute interval.  
 3.Create a new dataset that is equal to the original dataset but with the missing data filled in.
 ```{r imputing_missing}
 aci_data$mean <- ifelse(is.na(aci_data$steps), mean_na_steps$mean_steps, aci_data$steps)
@@ -101,7 +106,7 @@ After replace the missing value, below code compare the average number of steps 
 ```{r plot_weekds_vs_weekends}
 rev_aci_data$weekDay <- as.factor(weekdays(as.Date(rev_aci_data$date)))
 rev_aci_data$isWeekDay<-"weekday"
-rev_aci_data$isWeekDay[rev_aci_data$weekDay=="星期六" |rev_aci_data$weekDay=="星期日"]<-"weekend"
+rev_aci_data$isWeekDay[rev_aci_data$weekDay=="??????" |rev_aci_data$weekDay=="??????"]<-"weekend"
 rev_aci_data$isWeekDay<-as.factor(rev_aci_data$isWeekDay)
 summary_by<-aggregate(steps ~ interval + isWeekDay,data=rev_aci_data,FUN=mean)
 library("lattice")
